@@ -16,14 +16,16 @@ if __name__ == "__main__" :
             "cou_epaule" : 230,
             "hauteur_buste" : 550, 
             "hauteur_cou" : 500, 
-            "hauteur_aisselles" : 300,
+            "hauteur_aisselles" : 250,
             "largeur_epaules" : 64, 
             "offset" : 60, 
             "hauteur_manches" : 500,
             "largeur_manches" : 150
         }
     
+    distances["f-g"] = distances.get("hauteur_buste") - distances.get("hauteur_cou")
+    distances["f-i"] = distances.get("hauteur_buste") - distances.get("hauteur_aisselles")
+    
     p1 = BustPattern()
-    p1.create_body_pattern(distances=distances)
-    a1 = Affichage()
-    a1.print_pattern(p1)
+    a1 = Affichage(distances=distances, pattern=p1)
+    a1.print_pattern()

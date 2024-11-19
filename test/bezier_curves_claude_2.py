@@ -1,78 +1,50 @@
 import numpy as np
-import matplotlib.pyplot as plt
+import cv2
 
-def draw_precise_curve(start_point, end_point, through_point):
+def quadratic_bezier_curve(start_point, control_point, end_point, num_points=100):
     """
-    Create a quadratic Bézier curve that passes exactly through a specified point.
+    Generate points along a quadratic Bézier curve
     
-    Parameters:
-    start_point: tuple (x, y) - starting point (armpit)
-    end_point: tuple (x, y) - ending point (shoulder)
-    through_point: tuple (x, y) - point the curve must pass through
+    Args:
+    - start_point: Starting point (G)
+    - control_point: Control point (H)
+    - end_point: Ending point (I)
+    - num_points: Number of points to generate along the curve
     
     Returns:
-    numpy array of curve points
+    - Array of points on the Bézier curve
     """
-    # Convert points to numpy arrays
-    P0 = np.array(start_point)
-    P2 = np.array(end_point)
-    P1 = np.array(through_point)
+    t_values = np.linspace(0, 1, num_points)
+    curve_points = np.zeros((num_points, 2))
     
-    # Calculate the control point that makes the curve pass through the specified point
-    # We'll use the mathematical solution for a quadratic Bézier curve
-    t = 0.5  # We'll use midpoint by default, but this can be adjusted
+    for i, t in enumerate(t_values):
+        # Quadratic Bézier curve formula
+        curve_points[i] = (1-t)**2 * start_point + \
+                          2 * (1-t) * t * control_point + \
+                          t**2 * end_point
     
-    # Calculate the control point using the explicit point constraint
-    # Solve the quadratic equation: P = (1-t)²P0 + 2(1-t)tP1 + t²P2
-    numerator = P1 - (1-t)**2 * P0 - t**2 * P2
-    denominator = 2 * (1-t) * t
-    
-    actual_control_point = numerator / denominator
-    
-    # Create points for the Bézier curve
-    t_values = np.linspace(0, 1, 100)
-    curve_points = np.zeros((len(t_values), 2))
-    
-    # Calculate quadratic Bézier curve points
-    for i, t_i in enumerate(t_values):
-        curve_points[i] = (1-t_i)**2 * P0 + 2*(1-t_i)*t_i * actual_control_point + t_i**2 * P2
-    
-    # Create the plot
-    plt.figure(figsize=(10, 8))
-    
-    # Plot the curve
-    plt.plot(curve_points[:, 0], curve_points[:, 1], 'b-', linewidth=2, label='Pattern Curve')
-    
-    # Plot the points
-    plt.plot(P0[0], P0[1], 'ro', label='Start Point')
-    plt.plot(P2[0], P2[1], 'go', label='End Point')
-    plt.plot(P1[0], P1[1], 'ko', label='Specified Control Point')
-    plt.plot(actual_control_point[0], actual_control_point[1], 'mo', label='Computed Control Point')
-    
-    # Plot lines connecting points
-    plt.plot([P0[0], actual_control_point[0], P2[0]], 
-             [P0[1], actual_control_point[1], P2[1]], 'r--', alpha=0.3)
-    
-    plt.grid(True)
-    plt.legend()
-    plt.axis('equal')
-    plt.title('Bézier Curve Passing Through Specified Point')
-    
-    # Verify that the curve passes through the specified point
-    midpoint_index = len(curve_points) // 2
-    computed_midpoint = curve_points[midpoint_index]
-    
-    print(f"Specified through point:  {P1}")
-    print(f"Curve point at midpoint:  {computed_midpoint}")
-    print(f"Difference:               {np.linalg.norm(P1 - computed_midpoint)}")
-    
-    return curve_points
+    return curve_points.astype(np.int32)
 
-# Example usage
-start_point = (0, 0)    # Armpit point
-end_point = (10, 5)     # Shoulder point
-through_point = (6, 5)  # Point the curve must pass through
+# Specified points
+I = np.array([100., 350.])  # start point
+H = np.array([150., 330.])  # control point
+G = np.array([130., 150.])  # end point
+
+# Create a blank canvas
+canvas = np.zeros((1000, 1000, 3), dtype=np.uint8)
+
+# Generate Bézier curve points
+curve_points = quadratic_bezier_curve(G, H, I)
 
 # Draw the curve
-curve = draw_precise_curve(start_point, end_point, through_point)
-plt.show()
+cv2.polylines(canvas, [curve_points], isClosed=False, color=(0, 255, 0), thickness=2)
+
+# Draw original points
+""" cv2.circle(canvas, [G[0], G[1]], 5, (0, 0, 255), -1)  # End point in red
+cv2.circle(canvas, tuple(H), 5, (255, 0, 0), -1)  # Control point in blue
+cv2.circle(canvas, tuple(I), 5, (0, 255, 255), -1)  # Start point in yellow """
+
+# Show the result
+cv2.imshow('Bézier Curve', canvas)
+cv2.waitKey(0)
+cv2.destroyAllWindows()

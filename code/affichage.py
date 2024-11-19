@@ -2,64 +2,71 @@ import cv2
 import numpy as np
 import warnings
 
+from pattern_piece import PatternPiece
 from bust_pattern import BustPattern
 from custom_ellipse import CustomEllipseCurve
 from custom_line import CustomLine
+from custom_polyline import CustomPolyline
 
 class Affichage : 
-    def __init__(self):
+    def __init__(self, distances, pattern : PatternPiece):
         self.height, self.width = 700, 1500
         self.is_initailizing = True
         self.test_image = np.ones((self.height, self.width, 3), np.uint8) * 255
+        self.distances = distances
+        self.pattern : BustPattern = pattern
 
-    def print_pattern(self, pattern : BustPattern) : 
-        """ # Create a window
+    def print_pattern(self) : 
+        # Create a window
         cv2.namedWindow('Image')
 
         # Create trackbars for height and width
-        cv2.createTrackbar('inter_epaules', 'Image', distances["inter_epaules"], self.width, self.update_image)
-        cv2.createTrackbar('hauteur_buste', 'Image', distances["hauteur_buste"], self.width, self.update_image)
-        cv2.createTrackbar('hauteur_cou', 'Image', distances["hauteur_cou"], self.width, self.update_image)
-        cv2.createTrackbar('largeur_epaules', 'Image', distances["largeur_epaules"], self.width, self.update_image)
-        cv2.createTrackbar('offset', 'Image', distances["offset"], self.width, self.update_image)
-        cv2.createTrackbar('hauteur_manches', 'Image', distances["hauteur_manches"], self.width, self.update_image)
-        cv2.createTrackbar('largeur_manches', 'Image', distances["largeur_manches"], self.width, self.update_image)
-        self.is_initailizing = False """
+        for distance_name, distance in self.distances.items() : 
+            cv2.createTrackbar(distance_name, 'Image', distance, self.width, self.update_image)
 
-        self.print_points_as_dots(pattern=pattern)
-        self.print_links(pattern=pattern)
+        self.is_initailizing = False
+
+        self.print_points_as_dots()
+        self.print_links()
         self.draw_image()
 
 
     def draw_image(self) :
+        print("DRAWING IMAGE")
         cv2.imshow('Image', self.test_image)
-        cv2.imwrite('../results/test_pattern.png', self.test_image)
+        if self.is_initailizing :
+            cv2.imwrite('../results/test_pattern.png', self.test_image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+    def reset_image(self) :
+        self.test_image = np.ones((self.height, self.width, 3), np.uint8) * 255
     
     # Callback function for the trackbars
-    def update_image(self):
-        global distances
+    def update_image(self, val):
 
         if self.is_initailizing:
+            self.pattern.create_body_pattern(distances=self.distances)
             return
         
         # Get current positions of the trackbars
-        distances["inter_epaules"] = cv2.getTrackbarPos('inter_epaules', 'Image')
-        distances["hauteur_buste"] = cv2.getTrackbarPos('hauteur_buste', 'Image')
-        distances["hauteur_cou"] = cv2.getTrackbarPos('hauteur_cou', 'Image')
-        distances["largeur_epaules"] = cv2.getTrackbarPos('largeur_epaules', 'Image')
-        distances["offset"] = cv2.getTrackbarPos('offset', 'Image')
-        distances["hauteur_manches"] = cv2.getTrackbarPos('hauteur_manches', 'Image')
-        distances["largeur_manches"] = cv2.getTrackbarPos('largeur_manches', 'Image')
+
+        for distance_name, distance in self.distances.items() : 
+            self.distances[distance_name] = cv2.getTrackbarPos(distance_name, 'Image')
         
         # Redraw the image with updated values
-        self.draw_image()
+        try : 
+            self.reset_image()
+            self.pattern.create_body_pattern(distances=self.distances)
+            self.print_points_as_dots()
+            self.print_links()
+            self.draw_image()
+        except : 
+            print("THIS VALUE IS NOT FAISABLE")
 
 
-    def print_points_as_dots(self, pattern : BustPattern) : 
-        print(pattern.points)
+    def print_points_as_dots(self) : 
+        print(self.pattern.points)
 
         # Define text parameters
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -68,7 +75,7 @@ class Affichage :
         font_thickness = 1
         text_offset = (5, 5)  # Offset for text placement relative to point
 
-        for point_name, coordinates in pattern.points.items():
+        for point_name, coordinates in self.pattern.points.items():
             # Convert coordinates to integers for cv2
             x, y = int(coordinates[0]), int(coordinates[1])
             point_pos = (x, y)
@@ -80,24 +87,34 @@ class Affichage :
             text_pos = (x + text_offset[0], y + text_offset[1])
             cv2.putText(self.test_image, point_name, text_pos, 
                     font, font_scale, font_color, font_thickness)
+        
+        print(self.pattern.name)
+        cv2.putText(self.test_image, self.pattern.name, (int(self.width/6), int(self.height/2)), 
+                font, font_scale, font_color, font_thickness)  
+        
 
 
-    def print_links(self, pattern : BustPattern) : 
-        for link_name, link in pattern.links.items() : 
+    def print_links(self) : 
+        for link_name, link in self.pattern.links.items() : 
             if isinstance(link, CustomLine) :
                 print("DRAWING LINE")
-                self.draw_line(link, pattern)
+                self.draw_line(link)
             if isinstance(link, CustomEllipseCurve) :
                 print("DRAWING CURVE")
-                self.draw_ellipse(link, pattern)
+                self.draw_ellipse(link)
+            if isinstance(link, CustomPolyline) :
+                print("DRAWING POLYLINE")
+                self.draw_polyline(link)
 
 
-    def draw_line(self, line : CustomLine, pattern : BustPattern) : 
-        cv2.line(self.test_image, pattern.points.get(line.start_point), pattern.points.get(line.end_point), (255, 0, 0), 3)
+    def draw_line(self, line : CustomLine) : 
+        cv2.line(self.test_image, self.pattern.points.get(line.start_point), self.pattern.points.get(line.end_point), (255, 0, 0), 3)
 
 
-    def draw_ellipse(self, ellipse : CustomEllipseCurve, pattern : BustPattern) : 
-        cv2.ellipse(self.test_image, pattern.points.get(ellipse.center), ellipse.axes, 0, ellipse.compute_start_angle(pattern), ellipse.compute_end_angle(pattern), 255, 3)
-        """
-            Here : cv2.ellipse(image, center_coordinates as (x,y), axesLength as (a,b), angle, startAngle, endAngle, color, thickness) 
-        """
+    def draw_ellipse(self, ellipse : CustomEllipseCurve) : 
+        cv2.ellipse(self.test_image, self.pattern.points.get(ellipse.center), ellipse.axes, 0, ellipse.compute_start_angle(self.pattern), ellipse.compute_end_angle(self.pattern), 255, 3)
+        #Here : cv2.ellipse(image, center_coordinates as (x,y), axesLength as (a,b), angle, startAngle, endAngle, color, thickness) 
+
+    def draw_polyline(self, polyline : CustomPolyline) : 
+        curve_points = polyline.compute_bezier_interpolation_curve(pattern=self.pattern)
+        cv2.polylines(self.test_image, [curve_points], isClosed=False, color=(225, 0, 0), thickness=3)

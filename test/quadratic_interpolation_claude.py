@@ -1,3 +1,9 @@
+import os
+# Disable all Qt logging
+os.environ["QT_LOGGING_RULES"] = "*=false"
+os.environ["QT_DEBUG_PLUGINS"] = "0"
+os.environ["QT_VERBOSE"] = "0"
+
 import numpy as np
 import cv2
 
@@ -24,19 +30,12 @@ def quadratic_interpolation_curve(start_point, end_point, through_point, image_s
     
     # Compute quadratic interpolation coefficients
     def compute_parabola_coefficients(x0, y0, x1, y1, x2, y2):
-        """
-        Compute coefficients for a parabola passing through three points
-        """
-        denom = (x0 - x1) * (x0 - x2) * (x1 - x2)
-        if abs(denom) < 1e-10:
-            # Fallback if denominator is too close to zero
-            return lambda x: np.mean([y0, y1, y2])
-        
-        A = (x2 * (y1 - y0) + x1 * (y0 - y2) + x0 * (y2 - y1)) / denom
-        B = (x2*x2 * (y0 - y1) + x1*x1 * (y2 - y0) + x0*x0 * (y1 - y2)) / denom
-        C = (x1 * x2 * (x1 - x2) * y0 + x2 * x0 * (x2 - x0) * y1 + x0 * x1 * (x0 - x1) * y2) / denom
-        
-        return lambda x: A*x*x + B*x + C
+        diff10 = (y1-y0)/(x1-x0)
+        diff21 = (y2-y1)/(x2-x1)
+        c = y0
+        b = diff10
+        a = (diff21-diff10)/(x2-x0)
+        return lambda x : (a*(x-x1)*(x-x0)+b*(x-x0)+c) * (-1)
     
     # Generate x values
     x_values = np.linspace(P0[0], P2[0], 100)
@@ -48,6 +47,8 @@ def quadratic_interpolation_curve(start_point, end_point, through_point, image_s
     curve_points = np.zeros((len(x_values), 2), dtype=np.int32)
     for i, x in enumerate(x_values):
         curve_points[i] = [int(x), int(y_func(x))]
+
+    curve_length = np.sum(np.sqrt(np.sum(np.diff(curve_points, axis=0)**2, axis=1)))
     
     # Draw the curve
     cv2.polylines(img, [curve_points], isClosed=False, color=(0, 0, 255), thickness=2)
@@ -73,6 +74,7 @@ def quadratic_interpolation_curve(start_point, end_point, through_point, image_s
     print(f"Specified through point:  {P1}")
     print(f"Closest point on curve:   {closest_point}")
     print(f"Distance:                 {np.linalg.norm(P1 - closest_point)}")
+    print(f"Curve length:  {curve_length}")
     
     return img
 
@@ -80,12 +82,12 @@ def quadratic_interpolation_curve(start_point, end_point, through_point, image_s
 def run_tests():
     # Test case 1: Gentle curve
     img1 = quadratic_interpolation_curve(
-        start_point=(50, 50),     # Armpit
-        end_point=(400, 300),     # Shoulder
-        through_point=(200, 150)  # Curve point
+        start_point=(100, 350),     # Armpit
+        end_point=(130, 150),     # Shoulder
+        through_point=(150, 330)  # Curve point
     )
     
-    # Test case 2: Steeper curve
+    """ # Test case 2: Steeper curve
     img2 = quadratic_interpolation_curve(
         start_point=(50, 50),     # Armpit
         end_point=(400, 300),     # Shoulder
@@ -97,12 +99,12 @@ def run_tests():
         start_point=(50, 50),     # Armpit
         end_point=(400, 300),     # Shoulder
         through_point=(300, 100)  # Offset curve point
-    )
+    ) """
     
     # Display images
     cv2.imshow('Test 1: Gentle Curve', img1)
-    cv2.imshow('Test 2: Steeper Curve', img2)
-    cv2.imshow('Test 3: Asymmetric Curve', img3)
+    """ cv2.imshow('Test 2: Steeper Curve', img2)
+    cv2.imshow('Test 3: Asymmetric Curve', img3) """
     
     # Save images
     """cv2.imwrite('gentle_curve.png', img1)
