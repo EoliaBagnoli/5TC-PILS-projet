@@ -33,6 +33,7 @@ class Affichage :
 
     def draw_image(self) :
         cv2.imshow('Image', self.test_image)
+        cv2.imwrite('../results/test_pattern.png', self.test_image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 

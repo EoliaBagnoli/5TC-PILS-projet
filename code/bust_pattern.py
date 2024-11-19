@@ -6,6 +6,7 @@ from custom_line import CustomLine
 from custom_ellipse import CustomEllipseCurve
 
 from math import sqrt
+from sympy import symbols, solve, Eq, sqrt
 
 
 class BustPattern(PatternPiece) :
@@ -27,17 +28,17 @@ class BustPattern(PatternPiece) :
         self.set_point("E", [self.compute_e_point(distances=distances), self.get_point_y_value("D")])
         self.set_point("F", [0,0])
         self.set_point("G", [distances.get("inter_aisselles")-distances.get("inter_epaules"), self.get_point_y_value("C")]) 
-        self.set_point("H", self.compute_h_point()) # replace with real values
+        self.set_point("H", self.compute_h_point(distances=distances)) # replace with real values
         self.set_point("I", [0,  distances.get("hauteur_buste") - distances.get("hauteur_aisselles")])
-        self.set_point("J", [0, self.get_point_y_value("H")]) #replace with real values
+        self.set_point("J", [0, distances.get("hauteur_buste")-distances.get("hauteur_aisselles")-64]) #replace with real values
 
     def set_body_pattern_links(self, distances) : 
         print(self.points)
         a = abs(self.get_point_x_value("E") - self.get_point_x_value("D"))
         b = abs(self.get_point_y_value("C") - self.get_point_y_value("D"))
         axes_ce = (a, b)
-        c = distances.get('largeur_epaules')
-        d = int(distances.get("hauteur_cou")/4)-distances.get("offset")
+        c = 100
+        d = 64
         axes_hi = (c, d)
         self.links = {
             "AB" : CustomLine("A", "B"), 
@@ -48,9 +49,46 @@ class BustPattern(PatternPiece) :
             "HI" : CustomEllipseCurve(axes_hi, "J", "I", "H"), 
             "IA" : CustomLine("I", "A")
         }
+    
+    def solve_system(self, a, b, xa, ya, long):
+        """
+        Résout le système d'équations :
+        1: (y*(a**2)) / (x*(b**2)) = ((x-xa) / (y-ya))
+        2: sqrt((x-xa)^2 + (y-ya)^2) = long
+        
+        Args:
+            a, b : paramètres des coefficients
+            xa, ya : coordonnées du point A
+            long : longueur imposée du segment [XA]
+        
+        Returns:
+            list: Liste des solutions (x, y)
+        """
+        # Définition des symboles pour x et y
+        x, y = symbols('x y')
+        
+        # Première équation : relation des rapports
+        eq1 = Eq((y*(a**2))/(x*(b**2)), (x-xa)/(y-ya))
+        
+        # Deuxième équation : contrainte de longueur
+        eq2 = Eq(sqrt((x-xa)**2 + (y-ya)**2), long)
+        
+        # Résolution du système
+        solution = solve((eq1, eq2), (x, y))
+        
+        return solution
 
-    def compute_h_point(self) : 
-        return [50, 230]
+    def compute_h_point(self, distances) : 
+        # Définition des paramètres (à modifier selon vos besoins)
+        a = 60
+        b = 64
+        xa, ya = self.points.get("G")
+        print(xa, ya)
+        long = 25 # Longueur imposée du segment
+        
+        # Résolution
+        solutions = self.solve_system(a, b, xa, ya, long)
+        return [solutions[0][0].evalf(), solutions[0][1].evalf()]
     
     def compute_e_point(self, distances) : 
         """
