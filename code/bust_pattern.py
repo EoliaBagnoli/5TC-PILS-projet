@@ -72,7 +72,7 @@ class BustPattern(PatternPiece) :
 
         # Duplicate points
         count = len(xx) - 1
-        while count != 0 :
+        while count != 1 :
             mirror_x.append(xx[count]*(-1))
             mirror_y.append(yy[count])
             count = count - 1
@@ -82,7 +82,7 @@ class BustPattern(PatternPiece) :
         mirror_y = [mirror_y[index] + norm_y for index in range(len(mirror_y))]
 
         count = len(mirror_x) - 1
-        for letter in original_points[1:-1]: # Remove first and last points
+        for letter in original_points[2:-1]: # Remove C, D and B
             polygon[letter+"2"] = [mirror_x[count], mirror_y[count]]
             count = count - 1
 
@@ -90,15 +90,15 @@ class BustPattern(PatternPiece) :
         print(self.points)
         a = abs(self.get_point_x_value("E") - self.get_point_x_value("D"))
         b = abs(self.get_point_y_value("C") - self.get_point_y_value("D"))
-        a2 = abs(self.get_point_x_value("E2") - self.get_point_x_value("D2"))
-        b2 = abs(self.get_point_y_value("C") - self.get_point_y_value("D2"))
+        a2 = abs(self.get_point_x_value("E2") - self.get_point_x_value("D"))
+        b2 = abs(self.get_point_y_value("C") - self.get_point_y_value("D"))
         axes_ce = (a, b)
         axes_ce_2 = (a2, b2)
         self.links = {
             "AB" : CustomLine("A", "B"),
             "BA2" : CustomLine("A2","B"),
             "CE" : CustomEllipseCurve(axes_ce, "D", "C", "E"),
-            "C2E2" : CustomEllipseCurve(axes_ce_2, "D2", "C", "E2"),
+            "C2E2" : CustomEllipseCurve(axes_ce_2, "D", "C", "E2"),
             "EG" : CustomLine("E", "G"),
             "E2G2" : CustomLine("E2", "G2"),
             "GI" : CustomPolyline(start_point="I", end_point="G", through_point="J"),
