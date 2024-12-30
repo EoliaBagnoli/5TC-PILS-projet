@@ -95,8 +95,8 @@ class BustPattern(PatternPiece) :
         max_y = polygon["A"][1]
 
         for key in polygon.keys():
-            polygon[key][0] = round(polygon[key][0] + (polygon[key][0]/max_x) * 2 * self.BUFFER_OFFSET, 3)
-            polygon[key][1] = round(polygon[key][1] + (polygon[key][1]/max_y) * 2 * self.BUFFER_OFFSET, 3)
+            polygon[key][0] = int(polygon[key][0] + (polygon[key][0]/max_x) * 2 * self.BUFFER_OFFSET)
+            polygon[key][1] = int(polygon[key][1] + (polygon[key][1]/max_y) * 2 * self.BUFFER_OFFSET)
         print(f"\nNew Polygon : {polygon}")
 
     def set_body_pattern_links(self, distances) : 
