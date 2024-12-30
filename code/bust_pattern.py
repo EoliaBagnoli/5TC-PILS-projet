@@ -16,7 +16,7 @@ from shapely.plotting import plot_polygon, plot_points
 
 class BustPattern(PatternPiece) :
 
-    BUFFER_OFFSET = 1
+    BUFFER_OFFSET = 2
 
     def __init__(self):
         super().__init__(name="BustPattern")
@@ -95,8 +95,8 @@ class BustPattern(PatternPiece) :
         max_y = polygon["A"][1]
 
         for key in polygon.keys():
-            polygon[key][0] = int(polygon[key][0] + (polygon[key][0]/max_x) * 2 * self.BUFFER_OFFSET)
-            polygon[key][1] = int(polygon[key][1] + (polygon[key][1]/max_y) * 2 * self.BUFFER_OFFSET)
+            polygon[key][0] = int(polygon[key][0] + (polygon[key][0]/max_x) * 4 * self.BUFFER_OFFSET)
+            polygon[key][1] = int(polygon[key][1] + (polygon[key][1]/max_y) * 4 * self.BUFFER_OFFSET)
         print(f"\nNew Polygon : {polygon}")
 
     def set_body_pattern_links(self, distances) : 
