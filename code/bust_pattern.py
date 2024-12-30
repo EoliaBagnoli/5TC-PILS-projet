@@ -16,7 +16,7 @@ from shapely.plotting import plot_polygon, plot_points
 
 class BustPattern(PatternPiece) :
 
-    BUFFER_OFFSET = 0
+    BUFFER_OFFSET = 1
 
     def __init__(self):
         super().__init__(name="BustPattern")
@@ -51,7 +51,9 @@ class BustPattern(PatternPiece) :
     def get_whole_polygon(self, polygon):
         
         self.mirror_points(polygon)
-        # TODO : buffering
+        print(f"\nOld Polygon : {polygon}")
+        self.buffering(polygon)
+        
 
     def mirror_points(self, polygon):
 
@@ -85,9 +87,20 @@ class BustPattern(PatternPiece) :
         for letter in original_points[2:-1]: # Remove C, D and B
             polygon[letter+"2"] = [mirror_x[count], mirror_y[count]]
             count = count - 1
+    
+    def buffering(self, polygon):
+        
+        #2 Get max (top-right)
+        max_x = polygon["F2"][0]
+        max_y = polygon["A"][1]
+
+        for key in polygon.keys():
+            polygon[key][0] = round(polygon[key][0] + (polygon[key][0]/max_x) * 2 * self.BUFFER_OFFSET, 3)
+            polygon[key][1] = round(polygon[key][1] + (polygon[key][1]/max_y) * 2 * self.BUFFER_OFFSET, 3)
+        print(f"\nNew Polygon : {polygon}")
 
     def set_body_pattern_links(self, distances) : 
-        print(self.points)
+        #print(self.points)
         a = abs(self.get_point_x_value("E") - self.get_point_x_value("D"))
         b = abs(self.get_point_y_value("C") - self.get_point_y_value("D"))
         a2 = abs(self.get_point_x_value("E2") - self.get_point_x_value("D"))
