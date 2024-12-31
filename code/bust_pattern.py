@@ -51,13 +51,12 @@ class BustPattern(PatternPiece) :
     def get_whole_polygon(self, polygon):
         
         self.mirror_points(polygon)
-        print(f"\nOld Polygon : {polygon}")
+        print(f"\nInitial polygon : {polygon}")
         self.buffering(polygon)
+        print(f"\nBuffered polygon : {polygon}")
         
-
     def mirror_points(self, polygon):
-
-        # Order of the point in the polygon
+        # Order of the points in the polygon
         original_points = ["C", "D", "E", "F", "G", "H", "J", "I", "A", "B"]
 
         xx = [polygon[letter][0] for letter in original_points]
@@ -89,18 +88,15 @@ class BustPattern(PatternPiece) :
             count = count - 1
     
     def buffering(self, polygon):
-        
-        #2 Get max (top-right)
         max_x = polygon["F2"][0]
         max_y = polygon["A"][1]
 
         for key in polygon.keys():
+            # Need integer for ellipse, CV2 does not take float
             polygon[key][0] = int(polygon[key][0] + (polygon[key][0]/max_x) * 4 * self.BUFFER_OFFSET)
             polygon[key][1] = int(polygon[key][1] + (polygon[key][1]/max_y) * 4 * self.BUFFER_OFFSET)
-        print(f"\nNew Polygon : {polygon}")
 
     def set_body_pattern_links(self, distances) : 
-        #print(self.points)
         a = abs(self.get_point_x_value("E") - self.get_point_x_value("D"))
         b = abs(self.get_point_y_value("C") - self.get_point_y_value("D"))
         a2 = abs(self.get_point_x_value("E2") - self.get_point_x_value("D"))
