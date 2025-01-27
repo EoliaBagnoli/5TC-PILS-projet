@@ -28,9 +28,9 @@ class BustPattern(PatternPiece) :
         self.set_point("B", [distances.get("inter_aisselles"), distances.get("hauteur_buste")])
         self.set_point("C", [self.get_point_x_value("B"), distances.get("f-g")])
         self.set_point("D", [self.get_point_x_value("B"), 0])
-        self.set_point("E", [self.compute_e_point(distances=distances), self.get_point_y_value("D")])
+        self.set_point("E", [distances.get("f-e"), self.get_point_y_value("D")])
         self.set_point("F", [0,0])
-        self.set_point("G", [distances.get("inter_aisselles")-distances.get("inter_epaules"), self.get_point_y_value("C")]) 
+        self.set_point("G", [distances.get("inter_aisselles")-distances.get("inter_epaules"), (self.get_point_y_value("C")/ 2)]) 
         self.set_point("I", [0,  distances.get("f-i")])
         self.set_point("H", [distances.get("largeur_epaules"), (self.get_point_y_value("G")+self.get_point_y_value("I"))/2]) # replace with real values
         self.set_point("J", [self.get_point_x_value("H")*1.7, self.get_point_y_value("I")]) #replace with real values
