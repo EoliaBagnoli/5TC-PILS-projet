@@ -13,8 +13,9 @@ from custom_line import CustomLine
 from custom_polyline import CustomPolyline
 
 class Affichage : 
-    def __init__(self, distances, pattern : PatternPiece):
-        self.height, self.width = 700, 1500
+    def __init__(self, distances, pattern : PatternPiece, name : str):
+        self.name = name
+        self.height, self.width = 650, 1500
         self.is_initailizing = True
         self.test_image = np.ones((self.height, self.width, 3), np.uint8) * 255
         self.distances = distances
@@ -22,11 +23,11 @@ class Affichage :
 
     def print_pattern(self) : 
         # Create a window
-        cv2.namedWindow('Image')
+        cv2.namedWindow(self.name)
 
         # Create trackbars for height and width
         for distance_name, distance in self.distances.items() : 
-            cv2.createTrackbar(distance_name, 'Image', distance, self.width, self.update_image)
+            cv2.createTrackbar(distance_name, self.name, distance, self.width, self.update_image)
 
         self.is_initailizing = False
 
@@ -53,7 +54,7 @@ class Affichage :
 
     def draw_image(self) :
         print("DRAWING IMAGE")
-        cv2.imshow('Image', self.test_image)
+        cv2.imshow(self.name, self.test_image)
         if self.is_initailizing :
             cv2.imwrite('../results/test_pattern.png', self.test_image)
         cv2.waitKey(0)
@@ -72,7 +73,7 @@ class Affichage :
         # Get current positions of the trackbars
 
         for distance_name, distance in self.distances.items() : 
-            self.distances[distance_name] = cv2.getTrackbarPos(distance_name, 'Image')
+            self.distances[distance_name] = cv2.getTrackbarPos(distance_name, self.name)
         
         # Redraw the image with updated values
         try : 

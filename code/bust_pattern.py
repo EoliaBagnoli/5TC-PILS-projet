@@ -36,9 +36,9 @@ class BustPattern(PatternPiece) :
         polygon["B"] = [distances.get("inter_aisselles"), distances.get("hauteur_buste")]
         polygon["C"] = [polygon["B"][0], distances.get("f-g")]
         polygon["D"] = [polygon["B"][0], 0]
-        polygon["E"] = [self.compute_e_point(distances=distances), polygon["D"][1]]
+        polygon["E"] = [distances.get("f-e"), polygon["D"][1]]
         polygon["F"] = [0,0]
-        polygon["G"] = [distances.get("inter_aisselles")-distances.get("inter_epaules"), polygon["C"][1]]
+        polygon["G"] = [distances.get("inter_aisselles")-distances.get("inter_epaules"), (polygon["B"][1]/2)]
         polygon["I"] = [0,  distances.get("f-i")]
         polygon["H"] = [distances.get("largeur_epaules"), (polygon["G"][1]+polygon["I"][1])/2] # replace with real values
         polygon["J"] = [polygon["H"][0]*1.7, polygon["I"][1]] #replace with real values
