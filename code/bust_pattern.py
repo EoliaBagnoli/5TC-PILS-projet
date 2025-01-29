@@ -12,9 +12,11 @@ import numpy as np
 
 
 class BustPattern(PatternPiece) :
-    def __init__(self):
+    def __init__(self, style, sleeves):
         super().__init__(name="BustPattern")
-        letter_points = "ABCDEFGHI"
+        self.style = style
+        self.sleeves = sleeves
+        letter_points = "ABCDEFGHIJKL"
         self.initiate_points(letter_points=letter_points)
 
     def create_body_pattern(self, distances) : 
@@ -34,6 +36,8 @@ class BustPattern(PatternPiece) :
         self.set_point("I", [0,  distances.get("f-i")])
         self.set_point("H", [distances.get("largeur_epaules"), (self.get_point_y_value("G")+self.get_point_y_value("I"))/2]) # replace with real values
         self.set_point("J", [self.get_point_x_value("H")*1.7, self.get_point_y_value("I")]) #replace with real values
+        self.set_point("K", [distances.get("f-k"), (abs(self.get_point_y_value("A")+self.get_point_y_value("I")))/2])
+        self.set_point("L", [distances.get("f-l"), (abs(self.get_point_y_value("A")+self.get_point_y_value("I")))/2])
 
     def set_body_pattern_links(self, distances) : 
         print(self.points)
@@ -46,8 +50,10 @@ class BustPattern(PatternPiece) :
             "CE" : CustomEllipseCurve(axes_ce, "D", "C", "E"), 
             "EG" : CustomLine("E", "G"),
             "GI" : CustomPolyline(start_point="I", end_point="G", through_point="J"), 
-            "IA" : CustomLine("I", "A")
+            "IA" : CustomPolyline(start_point="I", end_point="A", through_point="L")
         }
+        if self.style == 'loose' : 
+            self.links["IA"] = CustomLine("I", "A")
 
     def compute_h_point(self, distances) : 
         return [50, 230]

@@ -11,9 +11,13 @@ from custom_polyline import CustomPolyline
 class Affichage : 
     def __init__(self, distances, pattern : PatternPiece, name : str):
         self.name = name
-        self.height, self.width = 650, 1500
+        self.height, self.width = 750, 400
         self.is_initailizing = True
-        self.test_image = np.ones((self.height, self.width, 3), np.uint8) * 255
+
+        self.is_saved = False
+        self.test_image = np.ones((self.height, self.width, 4), np.uint8) * 255  # 4 canaux (RGBA)
+        self.test_image[:, :, 3] = 0  # Canal alpha à 0 (complètement transparent)
+
         self.distances = distances
         self.pattern : BustPattern = pattern
 
@@ -35,8 +39,11 @@ class Affichage :
     def draw_image(self) :
         print("DRAWING IMAGE")
         cv2.imshow(self.name, self.test_image)
-        if self.is_initailizing :
-            cv2.imwrite('../results/test_pattern.png', self.test_image)
+        if self.is_saved == False :
+            self.is_saved = True
+            path = '../results/'+ self.name.replace('../', '').replace(".json", "") +'.png'
+            print(f"SAVING INTO : {path}")
+            cv2.imwrite(path, self.test_image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -92,6 +99,8 @@ class Affichage :
         print(self.pattern.name)
         cv2.putText(self.test_image, self.pattern.name, (int(self.width/6), int(self.height/2)), 
                 font, font_scale, font_color, font_thickness)  
+        cv2.putText(self.test_image, self.pattern.style, (int(self.width/6), int(self.height/1.8)), 
+                font, font_scale, font_color, font_thickness)  
         
 
 
@@ -109,13 +118,13 @@ class Affichage :
 
 
     def draw_line(self, line : CustomLine) : 
-        cv2.line(self.test_image, self.pattern.points.get(line.start_point), self.pattern.points.get(line.end_point), (255, 0, 0), 3)
+        cv2.line(self.test_image, self.pattern.points.get(line.start_point), self.pattern.points.get(line.end_point), (255, 0, 0, 255), 3)
 
 
     def draw_ellipse(self, ellipse : CustomEllipseCurve) : 
-        cv2.ellipse(self.test_image, self.pattern.points.get(ellipse.center), ellipse.axes, 0, ellipse.compute_start_angle(self.pattern), ellipse.compute_end_angle(self.pattern), 255, 3)
+        cv2.ellipse(self.test_image, self.pattern.points.get(ellipse.center), ellipse.axes, 0, ellipse.compute_start_angle(self.pattern), ellipse.compute_end_angle(self.pattern), (255, 0, 0, 255), 3)
         #Here : cv2.ellipse(image, center_coordinates as (x,y), axesLength as (a,b), angle, startAngle, endAngle, color, thickness) 
 
     def draw_polyline(self, polyline : CustomPolyline) : 
         curve_points = polyline.compute_bezier_interpolation_curve(pattern=self.pattern)
-        cv2.polylines(self.test_image, [curve_points], isClosed=False, color=(225, 0, 0), thickness=3)
+        cv2.polylines(self.test_image, [curve_points], isClosed=False, color=(225, 0, 0, 255), thickness=3)
