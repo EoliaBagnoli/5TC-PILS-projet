@@ -44,10 +44,11 @@ class BustPattern(PatternPiece) :
         polygon["I"] = [0, distances.get("f-i")]
         polygon["H"] = [distances.get("largeur_epaules"), (polygon["G"][1]+polygon["I"][1])/2] # replace with real values
         polygon["J"] = [polygon["H"][0]*1.7, polygon["I"][1]] #replace with real values
-        
+
         if self.style != 'loose' :
             polygon["K"] = [distances.get("f-k"), (abs(polygon["A"][1] + polygon["I"][1]))/2]
             polygon["L"] = [distances.get("f-l"), (abs(polygon["A"][1] + polygon["I"][1]))/2]
+
         self.get_whole_polygon(polygon)
 
         # Add the points to self
@@ -115,8 +116,6 @@ class BustPattern(PatternPiece) :
         self.links = {
             "AB" : CustomLine("A", "B"),
             "BA2" : CustomLine("A2","B"),
-            "BC" : CustomLine("B", "C"),
-            "B2C2" : CustomLine("B2", "C2"),
             "CE" : CustomEllipseCurve(axes_ce, "D", "C", "E"),
             "C2E2" : CustomEllipseCurve(axes_ce_2, "D", "C", "E2"),
             "EG" : CustomLine("E", "G"),
