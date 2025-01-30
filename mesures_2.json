@@ -1,0 +1,12 @@
+{
+    "cou" : 0.15, 
+    "poignet_epaule" : 0.49, 
+    "inter_epaules" : 0.39, 
+    "inter_aisselles" : 0.415, 
+    "epaule_cou" : 0.14, 
+    "epaule_hanche" : 0.595, 
+    "hauteur_cou" : 0.54,
+    "hauteur_aisselle" : 0.425, 
+    "tour_de_taille" : 0.66, 
+    "tour_de_buste" : 0.905
+}

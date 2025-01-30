@@ -18,9 +18,11 @@ class BustPattern(PatternPiece) :
 
     BUFFER_OFFSET = 2
 
-    def __init__(self):
+    def __init__(self, style, sleeves):
         super().__init__(name="BustPattern")
-        letter_points = "ABCDEFGHI"
+        self.style = style
+        self.sleeves = sleeves
+        letter_points = "ABCDEFGHIJKL"
         self.initiate_points(letter_points=letter_points)
 
     def create_body_pattern(self, distances) : 
@@ -36,12 +38,14 @@ class BustPattern(PatternPiece) :
         polygon["B"] = [distances.get("inter_aisselles"), distances.get("hauteur_buste")]
         polygon["C"] = [polygon["B"][0], distances.get("f-g")]
         polygon["D"] = [polygon["B"][0], 0]
-        polygon["E"] = [self.compute_e_point(distances=distances), polygon["D"][1]]
+        polygon["E"] = [distances.get("f-e"), polygon["D"][1]]
         polygon["F"] = [0,0]
-        polygon["G"] = [distances.get("inter_aisselles")-distances.get("inter_epaules"), polygon["C"][1]]
-        polygon["I"] = [0,  distances.get("f-i")]
+        polygon["G"] = [distances.get("inter_aisselles") - distances.get("inter_epaules"), (polygon["C"][1] / 2)]
+        polygon["I"] = [0, distances.get("f-i")]
         polygon["H"] = [distances.get("largeur_epaules"), (polygon["G"][1]+polygon["I"][1])/2] # replace with real values
         polygon["J"] = [polygon["H"][0]*1.7, polygon["I"][1]] #replace with real values
+        polygon["K"] = [distances.get("f-k"), (abs(polygon["A"][1] + polygon["I"][1]))/2]
+        polygon["L"] = [distances.get("f-l"), (abs(polygon["A"][1] + polygon["I"][1]))/2]
         self.get_whole_polygon(polygon)
 
         # Add the points to self
@@ -106,6 +110,8 @@ class BustPattern(PatternPiece) :
         self.links = {
             "AB" : CustomLine("A", "B"),
             "BA2" : CustomLine("A2","B"),
+            "BC" : CustomLine("B", "C"),
+            "B2C2" : CustomLine("B2", "C2"),
             "CE" : CustomEllipseCurve(axes_ce, "D", "C", "E"),
             "C2E2" : CustomEllipseCurve(axes_ce_2, "D", "C", "E2"),
             "EG" : CustomLine("E", "G"),
@@ -114,7 +120,11 @@ class BustPattern(PatternPiece) :
             "G2I2" : CustomPolyline(start_point="I2", end_point="G2", through_point="J2"),
             "IA" : CustomLine("I", "A"),
             "I2A2" : CustomLine("I2", "A2")
+            "GI" : CustomPolyline(start_point="I", end_point="G", through_point="J"), 
+            "IA" : CustomPolyline(start_point="I", end_point="A", through_point="L")
         }
+        if self.style == 'loose' : 
+            self.links["IA"] = CustomLine("I", "A")
 
     def compute_h_point(self, distances) : 
         return [50, 230]
