@@ -59,6 +59,7 @@ def invoke_pattern(json_path, style, sleeves) :
     p1 = BustPattern(style=style, sleeves=sleeves)
     a1 = Affichage(distances=distances, pattern=p1, name=json_path)
     a1.print_pattern()
+    a1.save_pattern_image()
 
 
 if __name__ == "__main__" : 

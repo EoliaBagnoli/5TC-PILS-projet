@@ -1,7 +1,11 @@
 import cv2
 import numpy as np
 import warnings
+import math
 
+from PIL import Image
+
+from pattern_scaler import PatternScaler
 from pattern_piece import PatternPiece
 from bust_pattern import BustPattern
 from custom_ellipse import CustomEllipseCurve
@@ -34,6 +38,22 @@ class Affichage :
         self.print_points_as_dots()
         self.print_links()
         self.draw_image()
+
+    def save_pattern_image(self):
+
+        # In millimiters
+        max_height = abs(self.pattern.get_point_y_value("A") - self.pattern.get_point_y_value("F"))
+        max_width = abs(self.pattern.get_point_x_value("A") - self.pattern.get_point_x_value("A2"))
+
+        print(f"max_height : {max_height}, max_width : {max_width}")
+
+        if not cv2.imwrite('../results/test_pattern.png', self.test_image):
+            raise Exception("Could not write image")
+
+        pdf_path = "../results/test_pdf.pdf"
+        
+        scaler = PatternScaler()
+        scaler.create_tiled_pdf('../results/test_pattern.png', (max_width*1.4)/10, max_height/10, pdf_path)
 
 
     def draw_image(self) :
