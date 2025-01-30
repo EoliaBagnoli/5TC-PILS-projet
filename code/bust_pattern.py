@@ -44,8 +44,10 @@ class BustPattern(PatternPiece) :
         polygon["I"] = [0, distances.get("f-i")]
         polygon["H"] = [distances.get("largeur_epaules"), (polygon["G"][1]+polygon["I"][1])/2] # replace with real values
         polygon["J"] = [polygon["H"][0]*1.7, polygon["I"][1]] #replace with real values
-        polygon["K"] = [distances.get("f-k"), (abs(polygon["A"][1] + polygon["I"][1]))/2]
-        polygon["L"] = [distances.get("f-l"), (abs(polygon["A"][1] + polygon["I"][1]))/2]
+        
+        if self.style != 'loose' :
+            polygon["K"] = [distances.get("f-k"), (abs(polygon["A"][1] + polygon["I"][1]))/2]
+            polygon["L"] = [distances.get("f-l"), (abs(polygon["A"][1] + polygon["I"][1]))/2]
         self.get_whole_polygon(polygon)
 
         # Add the points to self
@@ -61,7 +63,10 @@ class BustPattern(PatternPiece) :
         
     def mirror_points(self, polygon):
         # Order of the points in the polygon
-        original_points = ["C", "D", "E", "F", "G", "H", "J", "I", "A", "B"]
+        if self.style == 'loose' :
+            original_points = ["C", "D", "E", "F", "G", "H", "J", "I", "A", "B"]
+        else :
+            original_points = ["C", "D", "E", "F", "G", "H", "J", "I", "L", "A", "B"]
 
         xx = [polygon[letter][0] for letter in original_points]
         yy = [polygon[letter][1] for letter in original_points]
@@ -118,13 +123,13 @@ class BustPattern(PatternPiece) :
             "E2G2" : CustomLine("E2", "G2"),
             "GI" : CustomPolyline(start_point="I", end_point="G", through_point="J"),
             "G2I2" : CustomPolyline(start_point="I2", end_point="G2", through_point="J2"),
-            "IA" : CustomLine("I", "A"),
-            "I2A2" : CustomLine("I2", "A2")
-            "GI" : CustomPolyline(start_point="I", end_point="G", through_point="J"), 
-            "IA" : CustomPolyline(start_point="I", end_point="A", through_point="L")
         }
-        if self.style == 'loose' : 
+        if self.style == 'loose' :
             self.links["IA"] = CustomLine("I", "A")
+            self.links["I2A2"] = CustomLine("I2", "A2")
+        else :
+            self.links["IA"] = CustomPolyline(start_point="I", end_point="A", through_point="L")
+            self.links["I2A2"] = CustomPolyline(start_point="I2", end_point="A2", through_point="L2")
 
     def compute_h_point(self, distances) : 
         return [50, 230]
