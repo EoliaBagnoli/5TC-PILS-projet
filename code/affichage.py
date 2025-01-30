@@ -15,15 +15,21 @@ from custom_polyline import CustomPolyline
 class Affichage : 
     def __init__(self, distances, pattern : PatternPiece, name : str):
         self.name = name
-        self.height, self.width = 750, 400
+
+        self.distances = distances
+        self.pattern : BustPattern = pattern
+
+        try :
+            self.width, self.height = self.pattern.get_width_height()
+        except :
+            self.width, self.height = 600, 800
+        
         self.is_initailizing = True
 
         self.is_saved = False
         self.test_image = np.ones((self.height, self.width, 4), np.uint8) * 255  # 4 canaux (RGBA)
         self.test_image[:, :, 3] = 0  # Canal alpha à 0 (complètement transparent)
 
-        self.distances = distances
-        self.pattern : BustPattern = pattern
 
     def print_pattern(self) : 
         # Create a window
@@ -53,7 +59,7 @@ class Affichage :
         pdf_path = "../results/test_pdf.pdf"
         
         scaler = PatternScaler()
-        scaler.create_tiled_pdf('../results/test_pattern.png', (max_width*1.4)/10, max_height/10, pdf_path)
+        scaler.create_tiled_pdf('../results/test_pattern.png', (max_width*1.2)/10, (max_height*1.2)/10, pdf_path)
 
 
     def draw_image(self) :

@@ -22,7 +22,10 @@ class BustPattern(PatternPiece) :
         super().__init__(name="BustPattern")
         self.style = style
         self.sleeves = sleeves
-        letter_points = "ABCDEFGHIJKL"
+        if style == 'loose' :
+            letter_points = "ABCDEFGHIJ"
+        else :
+            letter_points = "ABCDEFGHIJKL"
         self.initiate_points(letter_points=letter_points)
 
     def create_body_pattern(self, distances) : 
@@ -138,4 +141,8 @@ class BustPattern(PatternPiece) :
         Trouvée en faisant le théorème de pythagore dans le triangle EGF car E-G est connue et G-F est connue
         """
         return int(sqrt(distances.get("cou_epaule")**2 - (distances.get("f-g"))**2))
-        
+    
+    def get_width_height(self) :
+        width = abs(self.get_point_x_value("A") - self.get_point_x_value("A2"))
+        height = abs(self.get_point_y_value("A") - self.get_point_y_value("F"))
+        return width, height
